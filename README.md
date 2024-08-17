@@ -1,0 +1,1 @@
+# WarehouseInventory_CQRS
