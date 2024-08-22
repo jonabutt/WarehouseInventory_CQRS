@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Products\Commands\" />
-    <Folder Include="Products\Models\" />
-    <Folder Include="Products\Queries\" />
-    <Folder Include="Stocks\Commands\" />
-    <Folder Include="Stocks\Models\" />
-    <Folder Include="Stocks\Queries\" />
+    <Compile Remove="Products\**" />
+    <Compile Remove="Stocks\**" />
+    <EmbeddedResource Remove="Products\**" />
+    <EmbeddedResource Remove="Stocks\**" />
+    <None Remove="Products\**" />
+    <None Remove="Stocks\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WarehouseInventory.Core\WarehouseInventory.Core.csproj" />
     <ProjectReference Include="..\WarehouseInventory.DB\WarehouseInventory.DB.csproj" />
   </ItemGroup>
 

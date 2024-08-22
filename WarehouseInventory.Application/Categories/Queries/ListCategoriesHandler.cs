@@ -1,29 +1,29 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WarehouseInventory.Application.Categories.Models;
 using WarehouseInventory.Application.Categories.Responses;
+using WarehouseInventory.Core.Constants;
 using WarehouseInventory.DB.Entities;
+using WarehouseInventory.DB.Readonly;
 
 namespace WarehouseInventory.Application.Categories.Queries
 {
     public class ListCategoriesHandler : IRequestHandler<ListCategories, IEnumerable<CategoryResponse>>
     {
+        private readonly ICache _cache;
         private readonly WarehouseInventoryContext _context;
-        public ListCategoriesHandler(WarehouseInventoryContext context)
+
+        public ListCategoriesHandler(WarehouseInventoryContext context, ICache cache)
         {
+            _cache = cache;
             _context = context;
         }
+
         public async Task<IEnumerable<CategoryResponse>> Handle(ListCategories request, CancellationToken cancellationToken)
         {
-            var queryResult = await _context.Categories
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
+            await _cache.DeleteAsync(Cache.Categories);
+            Func<Task<IEnumerable<Category>>> getCategories = async () => await _context.Categories.ToListAsync();
+
+            var queryResult = await _cache.GetAsync<IEnumerable<Category>>(Cache.Categories, getCategories);
             return queryResult.Select(x => new CategoryResponse(x));
         }
     }

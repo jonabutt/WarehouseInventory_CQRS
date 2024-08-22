@@ -1,7 +1,10 @@
 using dotenv.net;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using WarehouseInventory.Application.Configuration;
+using WarehouseInventory.Core.Constants;
 using WarehouseInventory.DB.Entities;
+using WarehouseInventory.DB.Readonly;
 
 DotEnv.Load();
 
@@ -19,7 +22,13 @@ builder.Services.AddDbContext<WarehouseInventoryContext>(options =>
 );
 builder.Services.AddMediatrDependencies();
 builder.Services.AddMediatR(cf => cf.RegisterServicesFromAssembly(typeof(DependencyInjectionExtension).Assembly));
-//services.AddMediatR(cf => cf.RegisterServicesFromAssembly(typeof(DependencyInjectionExtension).Assembly));
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis")!, true);
+    return ConnectionMultiplexer.Connect(configuration);
+});
+builder.Services.AddScoped<ICache, CacheRedis>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
