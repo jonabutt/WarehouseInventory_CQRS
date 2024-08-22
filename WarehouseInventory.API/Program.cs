@@ -1,6 +1,9 @@
+using dotenv.net;
 using Microsoft.EntityFrameworkCore;
 using WarehouseInventory.Application.Configuration;
 using WarehouseInventory.DB.Entities;
+
+DotEnv.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
