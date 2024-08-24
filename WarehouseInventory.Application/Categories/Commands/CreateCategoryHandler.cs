@@ -1,21 +1,18 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using WarehouseInventory.Application.Categories.Responses;
-using WarehouseInventory.Core.Constants;
 using WarehouseInventory.DB.Entities;
-using WarehouseInventory.DB.Readonly;
 
 namespace WarehouseInventory.Application.Categories.Commands
 {
     public class CreateCategoryHandler : IRequestHandler<CreateCategory, CategoryResponse>
     {
         private readonly WarehouseInventoryContext _context;
-        private readonly ICache _cache;
+        private readonly IMediator _mediator;
 
-        public CreateCategoryHandler(WarehouseInventoryContext context, ICache cache)
+        public CreateCategoryHandler(WarehouseInventoryContext context, IMediator mediator)
         {
             _context = context;
-            _cache = cache;
+            _mediator = mediator;
         }
 
         public async Task<CategoryResponse> Handle(CreateCategory request, CancellationToken cancellationToken)
@@ -29,10 +26,8 @@ namespace WarehouseInventory.Application.Categories.Commands
             await _context.Categories.AddAsync(category, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            //  store data in readonly store
-            var categories = await _context.Categories.ToListAsync();
-            await _cache.SetAsync(Cache.Categories, categories);
-            await _cache.SetAsync(Cache.CategoryItem.Replace("{id}", category.Id.ToString()), category);
+            //  store data in readonly store by publishing event
+            await _mediator.Publish(new CategoryCreatedNotification(category));
 
             return new CategoryResponse(category);
         }
