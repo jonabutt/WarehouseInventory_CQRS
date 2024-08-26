@@ -16,7 +16,14 @@ namespace WarehouseInventory.Application.Categories.Commands
         public async Task Handle(CategoryCreatedNotification notification, CancellationToken cancellationToken)
         {
             var cachedCategories = await _cache.GetAsync<List<Category>>(Cache.Categories);
-            cachedCategories.Add(notification.Category);
+            if (cachedCategories != null)
+            {
+                cachedCategories.Add(notification.Category);
+            }
+            else
+            {
+                cachedCategories = new List<Category> { notification.Category };
+            }
             await _cache.SetAsync(Cache.Categories, cachedCategories);
             await _cache.SetAsync(Cache.CategoryItem.Replace("{id}", notification.Category.Id.ToString()), notification.Category);
         }
